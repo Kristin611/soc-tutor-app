@@ -9,7 +9,7 @@ function App() {
   
   const handleClick = async () => {
     const response = await axios.get('http://localhost:3000')
-    console.log('RESPONSE:', response)
+    console.log('RESPONSE:', response.data)
   }
 
   return (
