@@ -6,6 +6,8 @@ import {
   type ColorModeProviderProps,
 } from "./color-mode"
 
+
+
 export function Provider(props: ColorModeProviderProps) {
   return (
     <ChakraProvider value={defaultSystem}>
