@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { User } from './user.entity';
+import { AuthModule } from './auth/auth.module';
 import typeorm from './config/typeorm';
 
 @Module({
@@ -16,7 +17,8 @@ import typeorm from './config/typeorm';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => (configService.get('typeorm'))
     }),
-    TypeOrmModule.forFeature([User]), //allows us to @InjectRepository in UsersService (app.service)
+    TypeOrmModule.forFeature([User]),
+    AuthModule, //allows us to @InjectRepository in UsersService (app.service)
   ],
   controllers: [AppController],
   providers: [AppService],
