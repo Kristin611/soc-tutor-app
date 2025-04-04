@@ -4,6 +4,7 @@
 import axios from 'axios';
 import './App.css';
 import { Box, Button, Input } from '@chakra-ui/react';
+import { Toaster } from "@/components/ui/toaster";
 import { useState } from 'react';
 import Header from './Components-R/Header';
 import { Outlet } from 'react-router-dom';
@@ -15,6 +16,7 @@ function App() {
     <>
       <Header />
       <Outlet />
+      <Toaster />
       {/* <Box m={10} display='flex' flexDirection='column'  gap={4}>
         <Input onChange={handleNameChange} placeholder='Type in a name'/>
         <Input onChange={handleUsernameChange} placeholder='Type in a username'/>

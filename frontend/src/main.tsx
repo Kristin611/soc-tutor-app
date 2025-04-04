@@ -6,6 +6,7 @@ import App from './App.tsx';
 import { Provider } from "@/components/ui/provider";
 import SignUp from './Pages/SignUp.tsx';
 import LogIn from './Pages/LogIn.tsx';
+import Profile from './Pages/ProfilePage.tsx';
 
 const router = createBrowserRouter([
   {
@@ -20,6 +21,10 @@ const router = createBrowserRouter([
       {
         path: '/log-in',
         element: <LogIn />
+      },
+      {
+        path: '/profile',
+        element: <Profile />
       }
     ]
   }

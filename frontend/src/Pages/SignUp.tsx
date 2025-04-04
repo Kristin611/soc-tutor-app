@@ -1,10 +1,15 @@
 import { Box, Heading, Field, Input, Button } from '@chakra-ui/react';
+import { toaster } from "@/components/ui/toaster";
 import axios from 'axios';
 import { useState } from 'react';
 import { isInvalidEmail } from '@/utils/emailValidation'; //helper function 
 import { passwordMismatch } from '@/utils/pwMatcher'; //helper function
+import { useNavigate } from 'react-router-dom';
 
 const SignUp = () => {
+    // react hooks
+    const navigate = useNavigate();
+
     const [name, setName] = useState('');
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
@@ -25,25 +30,25 @@ const SignUp = () => {
 
     const handleNameChange = (event: any) => {
         // console.log('EVENT:', event)
-        console.log(event.target.value);
+        // console.log(event.target.value);
         setIsClickedName(true);
         setName(event.target.value);
     }
 
     const handleUsernameChange = (event: any) => {
-        console.log(event.target.value);
+        // console.log(event.target.value);
         setIsClickedUsername(true);
         setUsername(event.target.value);
     };
 
     const handleEmailChange = (event: any) => {
-        console.log(event.target.value);
+        // console.log(event.target.value);
         setIsClickedEmail(true);
         setEmail(event.target.value);
     };
 
     const handlePasswordChange = (event: any) => {
-        console.log(event.target.value);
+        // console.log(event.target.value);
         setIsClickedPW(true);
         setPassword(event.target.value);
     };
@@ -83,7 +88,11 @@ const SignUp = () => {
                     password,
                     confirmPassword
                   })
-                  console.log('RESPONSE:', response)
+                  console.log('RESPONSE:', response.data)
+
+                  //save response JWT to localStorage
+                  const token = response.data;
+                  localStorage.setItem('token', token);
               
                   //clear out form
                   setName('')
@@ -91,6 +100,14 @@ const SignUp = () => {
                   setEmail('');
                   setPassword('');
                   setConfirmPassword('');
+
+                  navigate('/profile');
+                  
+                  toaster.create({
+                    title: 'Account created.',
+                    description: 'Account created successfully!',
+                    duration: 3000,
+                  })
                   
             } catch (error) {
                 console.log('error', error)
