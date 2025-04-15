@@ -110,7 +110,25 @@ const SignUp = () => {
                   })
                   
             } catch (error) {
+                //clear form
+                setName('')
+                setUsername('');
+                setEmail('');
+                setPassword('');
+                setConfirmPassword('');
+                setIsClickedName(false);
+                setIsClickedUsername(false);
+                setIsClickedEmail(false);
+                setIsClickedPW(false);
+                setIsClickedConfirmPW(false);
+
                 console.log('error', error)
+
+                toaster.create({
+                    title: 'Error',
+                    description: 'The username or email you used already exists. Please try again!',
+                    duration: 5000,
+                  })
             }
         }
 

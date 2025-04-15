@@ -31,5 +31,6 @@ export class AppModule {
     console.log('Database Port:', process.env.DATABASE_PORT);
     console.log('Database Username:', process.env.DB_USERNAME);
     console.log('Database Name:', process.env.DATABASE_NAME);
+    console.log('JWT:', process.env.JWT_SECRET)
   }
 }

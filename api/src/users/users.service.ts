@@ -11,8 +11,16 @@ export class UsersService {
         private usersRepository: Repository<User>,
     ) {}
 
+    async findUserByUsername(username: string) {
+        return await this.usersRepository.findBy({ username })
+    }
+
+    async findUserByEmail(email: string) {
+        return await this.usersRepository.findBy({ email })
+    }
+
     async createUser(user: SignUpDto) {
-        console.log('User', user);
+        //console.log('User', user);
         return await this.usersRepository.save({ ...user })
     }
 }
