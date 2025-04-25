@@ -4,11 +4,13 @@ import axios from 'axios';
 import { useState } from 'react';
 import { isInvalidEmail } from '@/utils/emailValidation'; //helper function 
 import { passwordMismatch } from '@/utils/pwMatcher'; //helper function
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
+import { Context } from '../App';
 
 const SignUp = () => {
     // react hooks
     const navigate = useNavigate();
+    const context = useOutletContext() as Context;
 
     const [name, setName] = useState('');
     const [username, setUsername] = useState('');
@@ -88,10 +90,11 @@ const SignUp = () => {
                     password,
                     confirmPassword
                   })
-                  console.log('RESPONSE:', response.data)
+                  //console.log('RESPONSE:', response.data)
 
                   //save response JWT to localStorage
                   const token = response.data;
+                  context.toggleLoggedIn();
                   localStorage.setItem('token', token);
               
                   //clear out form
@@ -101,7 +104,7 @@ const SignUp = () => {
                   setPassword('');
                   setConfirmPassword('');
 
-                  navigate('/profile');
+                  navigate('/dashboard');
                   
                   toaster.create({
                     title: 'Account created.',
@@ -110,6 +113,7 @@ const SignUp = () => {
                   })
                   
             } catch (error) {
+                console.log('ERROR FE:', error);
                 //clear form
                 setName('')
                 setUsername('');
