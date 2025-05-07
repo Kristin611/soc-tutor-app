@@ -3,15 +3,16 @@ import { toaster } from "@/components/ui/toaster";
 import { Box, Button, Text, Avatar } from "@chakra-ui/react";
 import { useLoaderData, useNavigate, useOutletContext } from "react-router-dom";
 import { AcctDetailsRow } from "@/Components-R/Profile/AcctDetailsRow";
+import { useState } from "react";
 
 
 
 //use type if get an error when doing data.name/username/email
-// type Data = {
-//     email: string;
-//     name: string;
-//     username: string;
-// }
+export type Data = {
+    email: string;
+    name: string;
+    username: string;
+}
 
 //getValue is used as a function in case data isn't ready yet, or if I want to transform values later like masking email. This makes it flexible.
 const profileFields = [
@@ -22,14 +23,15 @@ const profileFields = [
 ];
 
 const Profile = () => {
-    const data = useLoaderData();
+    const loaderData = useLoaderData() as Data;
+    const [data, setData] = useState(loaderData); //so the data automatically refreshes when the user updates account details
     const navigate = useNavigate();
     //console.log('LOADER DATA:', data);
 
     const context = useOutletContext() as Context;
     //console.log('CONTEXT:', context);
 
-    console.log('PROFILE DATA', data)
+    //console.log('PROFILE DATA', data)
 
     const handleLogout = () => {
         localStorage.removeItem('token'); //if token is removed from local storage, user is automatically signed out
@@ -59,7 +61,7 @@ const Profile = () => {
                 
                 <Box w='100%' display='flex' flexDirection='column' gap={3}>
                     {profileFields.map(({ id, field, getValue}) => (
-                        <AcctDetailsRow key={id} field={field} value={getValue(data)} username={data.username}/>
+                        <AcctDetailsRow key={id} field={field} value={getValue(data)} username={data.username} setData={setData}/>
                     ))}
                     {/* the above code profileFields.map() is a mapped out version of the below to make the code more DRY*/}
                     {/* <AcctDetailsRow field='Name' value={data.name}/>
