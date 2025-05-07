@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { LogInDto, SignUpDto } from './auth.controller';
+import { AccountDetailDto, LogInDto, SignUpDto } from './auth.controller';
 
 @Injectable()
 export class AuthService {
@@ -89,6 +89,30 @@ export class AuthService {
         //create and return an access token to the user
         return await this.createAccessToken(user);
     }
+
+    async changeAccountDetail(accountDetailDto: AccountDetailDto) {
+
+        //find user with username
+        const user = await this.usersService.findUserByUsername(
+            accountDetailDto.username,
+        );
+        //console.log('USER NAME', user.name);
+
+        // hash PW when user changes it on frontend
+        if (accountDetailDto.field === 'password') {
+            const plainTextPW = accountDetailDto.value;
+            const hashedPW = await this.hashPassword(plainTextPW);
+            user[accountDetailDto.field] = hashedPW;
+        } else {
+            //update the field in question on that user
+            user[accountDetailDto.field] = accountDetailDto.value;
+        }
+
+        //save the user in db and return user data
+        return await this.usersService.createUser(user);
+
+        // console.log('ACCOUNT DETAIL DTO', accountDetailDto);
+    };
 
     async getProfileData(username: string) {
         console.log('USERNAME AUTH CONTROLLER:', username);

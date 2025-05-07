@@ -33,6 +33,18 @@ export class LogInDto {
     password: string;
 }
 
+export class AccountDetailDto {
+    @IsNotEmpty()
+    username: string;
+
+    @IsNotEmpty()
+    field: string; //fields are already in database so do not need to transform them
+
+    @IsNotEmpty()
+    @Transform((params) => sanitizeHtml(params.value)) //since it is new input from the user we do want to transform it
+    value: string;
+}
+
 @Controller('auth')
 export class AuthController {
     constructor(private authService: AuthService) {}
@@ -45,6 +57,12 @@ export class AuthController {
     @Post('log-in')
     logIn(@Body() logInDto: LogInDto) {
         return this.authService.logIn(logInDto);
+    }
+
+    @UseGuards(AuthGuard) //bc it is a protected route
+    @Post('change-account-detail')
+    changeAccountDetail(@Body() accountDetailDto: AccountDetailDto) {
+        return this.authService.changeAccountDetail(accountDetailDto)
     }
 
     @UseGuards(AuthGuard) //UseGuards adding user info to the request
