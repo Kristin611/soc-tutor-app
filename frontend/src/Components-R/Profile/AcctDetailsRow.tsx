@@ -6,11 +6,13 @@ import { MdEdit, MdCheck } from "react-icons/md";
 import { forwardRef } from "react";
 import { IconBaseProps } from "react-icons";
 import { isInvalidEmail } from "@/utils/emailValidation";
+import { Data } from "@/Pages/ProfilePage";
 
 type Props = {
     field: string;
     value: string;
     username: string;
+    setData: React.Dispatch<React.SetStateAction<Data>>;
 }
 
 // Wrapping MdEdit with forwardRef due to the error: 'Warning Function components cannot be given refs.'
@@ -27,7 +29,7 @@ const ForwardRefMdEdit = forwardRef<SVGSVGElement, IconBaseProps>((props, ref) =
     </div>
   ));
 
-export const AcctDetailsRow = ({field, value, username}: Props) => {
+export const AcctDetailsRow = ({field, value, username, setData }: Props) => {
     const [updateIcon, setUpdateIcon] = useState(false);
     const [editText, setEditText] = useState(value); 
 
@@ -79,6 +81,8 @@ export const AcctDetailsRow = ({field, value, username}: Props) => {
         }, { headers: { Authorization: `Bearer ${token}` } });
 
        // console.log('ACCT DTLS ROW', response);
+       console.log('RESPONSE DATA', response.data);
+       setData(response.data);
 
         toaster.create({
             title: 'Success!',
@@ -89,7 +93,14 @@ export const AcctDetailsRow = ({field, value, username}: Props) => {
         return response;
         
         } catch (error) {
-            console.log(error);
+            console.log('ACCT DETAILS ERROR', error);
+
+            toaster.create({
+                title: 'Error',
+                description: 'There was an error. Please review your values and try again!',
+                duration: 3000,
+              });
+    
         }
     } 
         

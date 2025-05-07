@@ -17,7 +17,8 @@ export class AuthService {
     }
 
     async createAccessToken(user) {
-        const payload = { sub: user.userId, username: user.username };
+        console.log('USER', user.id);
+        const payload = { sub: user.id };
     return await this.jwtService.signAsync(payload);
     
     }
@@ -108,15 +109,20 @@ export class AuthService {
             user[accountDetailDto.field] = accountDetailDto.value;
         }
 
-        //save the user in db and return user data
-        return await this.usersService.createUser(user);
+        //save the user in db and return user data, specifically name, email, and username without id or password 
+        const updatedUser = await this.usersService.createUser(user);
+        return {
+            name: updatedUser.name,
+            email: updatedUser.email,
+            username: updatedUser.username,
+        }
 
         // console.log('ACCOUNT DETAIL DTO', accountDetailDto);
     };
 
-    async getProfileData(username: string) {
-        console.log('USERNAME AUTH CONTROLLER:', username);
-        const user = this.usersService.findUserByUsername(username);
+    async getProfileData(id: number) {
+        //console.log('USERNAME AUTH SERVICE:', username);
+        const user = this.usersService.findUserById(id);
         return {
             name: (await user).name,
             username: (await user).username,
