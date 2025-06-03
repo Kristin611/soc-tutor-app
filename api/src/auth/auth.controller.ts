@@ -5,6 +5,7 @@ import * as sanitizeHtml from 'sanitize-html';
 import { Transform } from 'class-transformer'; 
 import { AuthGuard } from './auth.guard';
 
+//class validator
 export class SignUpDto {
     @IsNotEmpty()
     @Transform((params) => sanitizeHtml(params.value)) //sanitize html
@@ -45,6 +46,12 @@ export class AccountDetailDto {
     value: string;
 }
 
+export class Email {
+    @IsEmail()
+    @Transform((params) => sanitizeHtml(params.value))
+    email: string;
+}
+
 @Controller('auth')
 export class AuthController {
     constructor(private authService: AuthService) {}
@@ -71,5 +78,10 @@ export class AuthController {
         //console.log('REQ', req.user)
         return this.authService.getProfileData(req.user.sub) //bc sub: user.id in authService basically sub = user.id
         
+    }
+
+    @Post('reset-password')
+    resetPWEmail(@Body() email: Email) {
+        console.log('EMAIL', email);
     }
 }

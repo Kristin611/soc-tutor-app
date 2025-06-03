@@ -1,6 +1,7 @@
+import ForgotPWModal from '@/Components-R/Login/ForgotPWModal';
 import { Context } from '../App';
 import { toaster } from '@/components/ui/toaster';
-import { Box, Button, Field, Heading, Input } from '@chakra-ui/react';
+import { Box, Button, Field, Heading, Input, Text} from '@chakra-ui/react';
 import axios from 'axios';
 import { useState } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
@@ -119,7 +120,12 @@ const LogIn = () => {
     
     
             </Box>
+            <Box display='flex'  gap={10} justifyContent='center' mt={10}>
+              <Text lineHeight='40px'>Forgot your password?</Text>
+              <ForgotPWModal />           
+            </Box>
         </Box>
+        
   )
 }
 
