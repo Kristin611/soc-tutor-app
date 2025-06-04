@@ -3,12 +3,15 @@ import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { AccountDetailDto, LogInDto, SignUpDto } from './auth.controller';
+import { MailService } from 'src/mail/mail.service';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
     constructor(
         private usersService: UsersService,
-        private jwtService: JwtService
+        private jwtService: JwtService,
+        private mailService: MailService,
     ) {} //now we can call a function within our usersService
 
     async hashPassword(password: string) {
@@ -16,11 +19,19 @@ export class AuthService {
         return bcrypt.hash(password, saltRounds)
     }
 
-    async createAccessToken(user) {
-        console.log('USER', user.id);
+    async createAccessToken(user: User, secret?: string) { //question mark means the parameter is optional
+        //console.log('USER', user.id);
         const payload = { sub: user.id };
-    return await this.jwtService.signAsync(payload);
-    
+
+        //the secret is for PW reset
+        if (secret) {
+            return await this.jwtService.signAsync(payload, {
+                secret,
+                expiresIn: '10m',
+            })
+        } else {
+            return await this.jwtService.signAsync(payload);
+        }
     }
 
     async signUp(signUpDto: SignUpDto) {
@@ -128,6 +139,23 @@ export class AuthService {
             username: (await user).username,
             email: (await user).email
         }
+
+    }
+
+    async sendResetPWEmail(email: string) {
+        const user = await this.usersService.findUserByEmail(email);
+
+        if (user === null) {
+            throw new BadRequestException('email not found');
+        }
+
+        //create a JWT with the user's current hashed password as secret
+        const token = await this.createAccessToken(user, user.password); 
+        //console.log('AUTH SERVICE USER', user);
+        console.log('AUTH SERVICE TOKEN', token);
+
+        // send an email to the user with a link to a reset pw page onthe frontend with the JWT and userId as params
+        return await this.mailService.sendPWResetEmail(user, token);
 
     }
 }
