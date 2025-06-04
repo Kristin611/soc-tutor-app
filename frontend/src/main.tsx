@@ -10,6 +10,7 @@ import Profile from './Pages/ProfilePage.tsx';
 import Dashboard from "./Pages/Dashboard.tsx";
 import axios from "axios";
 import { toaster } from "./components/ui/toaster.tsx";
+import ResetPW from "./Pages/ResetPW.tsx";
 
 const router = createBrowserRouter([
   {
@@ -80,6 +81,10 @@ const router = createBrowserRouter([
       {
         path: '/dashboard',
         element: <Dashboard />
+      },
+      {
+        path: '/reset-password/:token/:id',
+        element: <ResetPW />
       }
     ]
   }
