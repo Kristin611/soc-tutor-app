@@ -1,6 +1,8 @@
+import { toaster } from "@/components/ui/toaster";
 import { Box, Button, Field, Heading, Input } from "@chakra-ui/react"
+import axios from "axios";
 import { useState } from "react";
-import { useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 
 
 const ResetPW = () => {
@@ -8,6 +10,8 @@ const ResetPW = () => {
     const {id, token} = useParams(); //deconstructed const params to const {id, token}
     //console.log('ID', id);
     //console.log('TOKEN', token)
+
+    const navigate = useNavigate();
 
     const [password, setPassword] = useState('');
     const [secondPW, setSecondPW] = useState('');
@@ -30,15 +34,42 @@ const ResetPW = () => {
         setSecondPW(e.target.value);
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         console.log('PASSWORD', password);
         console.log('SECOND PASSWORD', secondPW);
 
         setSubmitPW(true);
         setSubmitSecondPW(true);
 
-        // setPassword('');
-        // setSecondPW('');
+        try {
+            const response = await axios.post('http://localhost:3000/auth/save-new-password', {
+                newPassword: password, //to match backend set up in auth controller DTO
+                id,
+                token,
+            })
+
+            console.log('RESET PW RESPONSE', response.data);
+
+            //clear form
+            setPassword('');
+            setSecondPW('');
+            navigate('/log-in');
+
+            toaster.create({
+                      title: 'Success!',
+                      description: 'Your password has been reset--please log in with your new password!',
+                      duration: 5000,
+                    })
+
+        } catch (error) {
+            //console.log('RESET PW ERROR', error)
+
+            toaster.create({
+                title: 'Error',
+                description: 'We cannot reset your password at this time. Please start the reset password process again!',
+                duration: 3000,
+            })
+        }
     };
   return (
     <Box>

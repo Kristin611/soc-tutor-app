@@ -6,6 +6,7 @@ import { Transform } from 'class-transformer';
 import { AuthGuard } from './auth.guard';
 
 //class validator
+//modularize these Dtos
 export class SignUpDto {
     @IsNotEmpty()
     @Transform((params) => sanitizeHtml(params.value)) //sanitize html
@@ -52,6 +53,19 @@ export class Email {
     email: string;
 }
 
+export class NewPWDto {
+    @IsNotEmpty()
+    @Transform((params) => sanitizeHtml(params.value))
+    newPassword: string;
+
+    @IsNotEmpty()
+    id: number;
+
+    @IsNotEmpty()
+    token: string;
+
+}
+
 @Controller('auth')
 export class AuthController {
     constructor(private authService: AuthService) {}
@@ -84,5 +98,10 @@ export class AuthController {
     sendResetPWEmail(@Body() body: Email) {
         //console.log('EMAIL', email);
         return this.authService.sendResetPWEmail(body.email);
+    }
+
+    @Post('save-new-password')
+    saveNewPW(@Body() body: NewPWDto) {
+        return this.authService.saveNewPW(body.newPassword, body.id, body.token);
     }
 }
