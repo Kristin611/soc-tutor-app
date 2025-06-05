@@ -158,4 +158,41 @@ export class AuthService {
         return await this.mailService.sendPWResetEmail(user, token);
 
     }
+
+    async saveNewPW(newPassword: string, id: number, token: string) {
+        // console.log('NEW PASSWORD', newPassword);
+        // console.log('NEW PW ID', id);
+        // console.log('NEW PW TOKEN', token);
+
+        try {
+            //get the user associated with that id
+            const user = await this.usersService.findUserById(id);
+
+            //verify token using the user we just looked up's hashed password - verify that the token is valid with jwtService
+            const payload = await this.jwtService.verifyAsync(
+            token,
+            {
+                secret: user.password //the secret is the user's hashed pw
+            });
+
+            // console log payload
+            //console.log('NEW PW TOKEN PAYLOAD', payload);
+
+            //if we have a payload, hash the newPassword and update the user in the database
+            if (payload) {
+                const newHashedPW = await this.hashPassword(newPassword);
+                user.password = newHashedPW;
+                return await this.usersService.createUser(user);
+            } else {
+                console.log('NO PAYLOAD');
+            }
+
+        } catch (error) {
+            //console.log('ERROR', error);
+            throw new UnauthorizedException('token is invalid');
+        }
+        
+
+        
+    }
 }
