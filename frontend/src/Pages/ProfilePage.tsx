@@ -4,6 +4,7 @@ import { Box, Button, Text, Avatar } from "@chakra-ui/react";
 import { useLoaderData, useNavigate, useOutletContext } from "react-router-dom";
 import { AcctDetailsRow } from "@/Components-R/Profile/AcctDetailsRow";
 import { useState } from "react";
+import axios from "axios";
 
 
 
@@ -45,6 +46,39 @@ const Profile = () => {
                 })
     }
 
+    const handleDeleteAcct = async () => {
+        const token = localStorage.getItem('token');
+
+        try {
+            const response = await axios.post('http://localhost:3000/auth/delete-user', 
+                {}, 
+                {
+                headers: { Authorization: `Bearer ${token}`}
+                });
+
+            localStorage.removeItem('token');
+            
+            console.log('DELETE RESPONSE', response.data);
+
+            navigate('/sign-up');
+
+         toaster.create({
+                  title: 'Success',
+                  description: 'Your account has been deleted.',
+                  duration: 3000,
+                })
+
+        } catch (error) {
+            console.log('DELETE ERROR', error)
+
+            toaster.create({
+                  title: 'Error',
+                  description: 'There was an issue deleting your account. Please try again!',
+                  duration: 3000,
+                })
+        }
+    }
+
     return (
         <Box>
             <Text textAlign='center' mb={4} fontSize={20}>
@@ -72,7 +106,7 @@ const Profile = () => {
             </Box>
             <Box display='flex' gap={4} justifyContent='center'>
                 <Button w='11%' onClick={handleLogout}>Log Out</Button>
-                <Button onClick={() => {console.log('delete')}}>Delete Account</Button>
+                <Button onClick={handleDeleteAcct}>Delete Account</Button>
             </Box>
             
         </Box>

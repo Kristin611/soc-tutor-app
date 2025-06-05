@@ -195,4 +195,8 @@ export class AuthService {
 
         
     }
+
+    async deleteUser(id: number) {
+        return await this.usersService.deleteUser(id)
+    }
 }
