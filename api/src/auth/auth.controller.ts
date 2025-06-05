@@ -104,4 +104,10 @@ export class AuthController {
     saveNewPW(@Body() body: NewPWDto) {
         return this.authService.saveNewPW(body.newPassword, body.id, body.token);
     }
+
+    @UseGuards(AuthGuard)
+    @Post('delete-user')
+    deleteUser(@Request() req) {
+        return this.authService.deleteUser(req.user.sub);
+    }
 }
