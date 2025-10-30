@@ -80,7 +80,30 @@ const router = createBrowserRouter([
       },
       {
         path: '/dashboard',
-        element: <Dashboard />
+        element: <Dashboard />,
+        loader: async () => {
+          // check if token exists
+          const token = localStorage.getItem('token');
+
+          if (!token) {
+            // no token - redirect to login
+            return redirect('/log-in');
+          }
+
+          // verify token is still valid
+          try {
+            await axios.get('http://localhost:3000/auth/profile',
+              { headers: { Authorization: `Bearer ${token}`}}
+            );
+            return {}; // token valid, allow access
+          } catch (error) {
+            // token expired or invalid
+            console.log('Dashboard loader: Token validation failed');
+            localStorage.removeItem('token');
+            return redirect('/log-in');
+          }
+        },
+        hydrateFallbackElement: <div>Loading...</div>
       },
       {
         path: '/reset-password/:token/:id',

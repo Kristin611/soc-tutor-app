@@ -7,6 +7,7 @@ import { User } from './user.entity';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import typeorm from './config/typeorm';
+import { SociologyModule } from './sociology/soc.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import typeorm from './config/typeorm';
     TypeOrmModule.forFeature([User]),
     AuthModule,
     UsersModule, //allows us to @InjectRepository in UsersService (app.service)
+    SociologyModule, 
   ],
   controllers: [AppController],
   providers: [AppService],

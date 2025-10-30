@@ -13,11 +13,11 @@ type Props = {
 
 const Header = ({loggedIn}: Props) => {
   return (
-    <Box border='solid' display='flex' alignItems='center'>
-      <Box border='solid' p={5} m={3} display='flex'>
-        <Heading>Sociology Tutor App</Heading>
+    <Box display='flex' alignItems='center'>
+      <Box p={5} m={3} display='flex'>
+        <Heading>Sociology Tutor</Heading>
       </Box>
-      <Box display='flex' justifyContent='space-around' border='solid' w='75%'>
+      <Box display='flex' justifyContent='space-around' w='75%'>
         {pages.map((page) => {
           if (
             (loggedIn && page.showWhenLoggedIn) ||
