@@ -1,9 +1,10 @@
-import { Box, VStack, Container, Heading, Text, Input, Button, Spinner } from '@chakra-ui/react';
+import { Box, VStack, Container, Heading, Text, Input, Button, Spinner, HStack, Grid } from '@chakra-ui/react';
 import { useState, useRef, useEffect } from "react";
 import axios from 'axios';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { Context } from '../App';
 import { toaster } from '@/components/ui/toaster'; 
+import ChatToolbar from '../Components-R/ChatToolbar';
 
 //TS interface/structure to store chat messages: a blueprint that tells TS every message object must have these 4 properties
 interface Message {
@@ -21,6 +22,115 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(false); //boolean to track if API call is happening
   const [messages, setMessages] = useState<Message[]>([]); //array that stores chat history
   const autoScroll = useRef<HTMLDivElement>(null); //useRef creates a pointer to a DOM element
+  const [summary, setSummary] = useState(''); //its a string '' (and not array []) bc its the AI's written summary, not the chat itself
+  const [isSummarizing, setIsSummarizing] = useState(false); //boolean to track when generating a summary (shows loading spinner on summarize button) 
+
+  // clear chat button
+  const clearChatHistory = () => {
+    console.log('=== Clearing Chat History ===');
+
+    //clear state
+    setMessages([]);
+    console.log('Messages state cleared');
+
+    // clear localStorage
+    localStorage.removeItem('sociology-chat-history');
+    console.log('localStorage cleared');
+
+    // toast notification
+    toaster.create({
+      title: 'Chat Cleared',
+      description: 'Your conversation history has been deleted.',
+      type: 'info',
+      duration: 3000,
+    })
+  }
+
+  // summarize chat history
+  const handleSummarize = async () => {
+    console.log('=== STARTING SUMMARIZE ===');
+
+    // display toaster if user clicks the sum button but there are no chats to summarize 
+    if (messages.length === 0) {
+      console.log('No messages to summarize');
+      toaster.create({
+        title: 'No Chat History',
+        description: 'Ask some questions first!',
+        type: 'info',
+        duration: 3000
+      });
+      return;
+    }
+
+    setIsSummarizing(true);
+    console.log('Setting isSummarizing to true');
+
+    try {
+      // get last 3 messages for summarization
+      const recentMessages = messages.slice(-3);
+      console.log('Recent messages to summarize:', recentMessages);
+
+      //conver to tuples format that FastAPI expects
+      const chatHistory = recentMessages.map(msg => [
+        msg.question,
+        msg.answer
+      ]);
+
+      console.log('Chat history as tuples:', chatHistory);
+      console.log('Calling /api/sociology/summarize');
+
+      const token = localStorage.getItem('token');
+
+      const response = await axios.post('http://localhost:3000/api/sociology/summarize', {
+        chat_history: chatHistory // sending as array of arrays
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log('Summarize response:', response.data);
+
+      // Handle the summary -- extract the text from the object
+      const summaryData = response.data.summary;
+      console.log('Summary DATA:', summaryData);
+
+      // format the summary
+      let summaryText = '';
+
+      if (summaryData.topic) {
+        summaryText += `**Topic:** ${summaryData.topic}\n\n`;
+      }
+
+      if (summaryData.key_points && Array.isArray(summaryData.key_points)) {
+        summaryText += '**Key Points:**\n'
+        summaryData.key_points.forEach((point, index) => {
+          summaryText += `${index + 1}. ${point}\n\n`
+        })
+      }
+
+      console.log('Formatted summary text:', summaryText);
+      setSummary(summaryText);
+
+      toaster.create({
+        title: 'Summary Generated!',
+        description: 'Check the left sidebar for your chat summary.',
+        type: 'success',
+        duration: 3000,
+      })
+
+    } catch (error: any) {
+      console.error('Error generating summary:', error);
+    } finally {
+      setIsSummarizing(false);
+      console.log('=== SUMMARIZE COMPLETE ===');
+    }
+
+
+
+  }
+
 
   // scrolls chat to the bottom
   const scrollToBottom = () => {
@@ -166,10 +276,51 @@ const Dashboard = () => {
     <Container maxW="container.xl" py={6}>
       <VStack>
         <Box>
-          <Heading>Ask a Question about Sociology!</Heading>
+          <Heading size='xl'>Ask a Question about Sociology!</Heading>
         </Box>
 
-        {(messages.length > 0 || isLoading) && (
+        <Grid
+          templateColumns={summary ? '300px 1fr' : '1fr'}
+          gap={4}
+          minHeight='600px'
+        >
+          {/* LEFT SIDEBAR - SUMMARY */}
+          {summary && (
+            <Box
+              bg='white'
+              border='1px solid'
+              borderColor='gray.300'
+              borderRadius='md'
+              p={4}
+              overflowY='auto'
+              maxHeight='600px'
+            >
+              <HStack justifyContent='space-between' mb={3}>
+                <Text fontWeight='bold' color='purple.700'>
+                  Summary
+                </Text>
+                <Button
+                  size='xs'
+                  variant='ghost'
+                  onClick={() => setSummary('')}
+                >
+                  X
+                </Button>
+              </HStack>
+              <Box fontSize='sm' color='gray.700' whiteSpace='pre-line'>
+                {summary.split('**').map((part, index) => {
+                  if (index % 2 === 1) {
+                    return <Text key={index} as='span' fontWeight='bold'>{part}</Text>;
+                  }
+                  return <Text key={index} as='span'>{part}</Text>
+                })}
+              </Box>
+            </Box>
+          )}
+
+          {/* RIGHT SIDEBAR - chat area */}
+          <VStack align='stretch' spacing={4}>
+            {(messages.length > 0 || isLoading) && (
           <Box
             width='100%'
             maxHeight='500px'
@@ -240,16 +391,11 @@ const Dashboard = () => {
           </Box>
         )}
 
-        {/* debug box */}
-          {/* <Box bg='gray.100' p={4} borderRadius='md' mt={4} border='solid'>
-            <Text fontWeight="bold" mb={2}>Debug Info:</Text>
-            <Text fontSize='sm'>Current Question: "{currentQuestion}"</Text>
-            <Text fontSize='sm'>Is loading: {isLoading ? 'Yes' : 'No'}</Text>
-            <Text fontSize='sm'>Number of messages: {messages.length}</Text>
-          </Box> */}
+          
 
           <VStack width='100%'>
-          <Input
+            <HStack>
+                <Input
             variant="subtle"
             placeholder="Explore your textbook by asking a question about sociology..."
             value={currentQuestion}
@@ -258,10 +404,24 @@ const Dashboard = () => {
             minWidth='500px'
             size="lg"
           />
+          <ChatToolbar 
+            onClear={clearChatHistory}
+            onSummarize={handleSummarize}
+            onSearch={() => console.log('search coming soon')}
+            hasMessages={messages.length > 0}
+            isSummarizing={false}    
+          />
+            </HStack>
+        
           <Button onClick={handleSubmitQuestion} disabled={!currentQuestion.trim()}>
             Submit
           </Button>
+          </VStack>
         </VStack>
+
+        </Grid>
+
+        
       </VStack>
     </Container>
     
